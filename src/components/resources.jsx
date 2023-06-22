@@ -1,23 +1,31 @@
-import React from 'react';
-import { Tooltip } from 'react-tooltip';
+import React, { useState, useEffect } from 'react';
 
+function Resources({ initialResources, faithThr1 }) {
+  const [resources, setResources] = useState(initialResources);
 
-function Resources({ resources }) {
+  useEffect(() => {
+    setResources(initialResources);
+  }, [initialResources]);
+
   return (
     <div className="resources">
-      {resources.map(({ name, value, max }) => (
-        <div key={name} className="resource">
-          <div className="resource-name">{name}:</div>
-          {name === 'Members' ? (
-            <div className="resource-value">
-              <div>{value}</div>
-              <div style={{ marginLeft: '5px' }}>/ {max}</div>
-            </div>
-          ) : (
-            <div className="resource-value">{value}</div>
-          )}
-        </div>
-      ))}
+      <table>
+        <tbody>
+          {resources.map(({ name, value, max, perSecond }) => (
+            (name === 'Members' && !faithThr1) ? null : (
+              <tr key={name}>
+                <td className='resTd1'>{name}</td>
+                <td className='resTd2'>
+                  <span style={{ color: value === max ? 'red' : 'inherit' }}>
+                    {`${Math.round(value).toLocaleString()} / ${max.toLocaleString()}`}
+                  </span>
+                </td>
+                <td className='resTd3'>{`${perSecond} /s`}</td>
+              </tr>
+            )
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

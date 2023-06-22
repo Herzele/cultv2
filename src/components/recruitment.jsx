@@ -22,16 +22,18 @@ function Recruitment({ money, handleClick }) {
   return (
     <div>
       <h2>Recruitment Options</h2>
-      {recruitmentOptions.map((option) => (
-        <button
-          key={option.name}
-          onClick={() => handleClick(option.cost, option.newMemberCount)}
-          disabled={option.cost > money}
-          title={`${option.newMemberCount} new members`}
-        >
-          {option.name} ({option.cost} money)
-        </button>
-      ))}
+      <div className='recruitment-buttons'>
+        {recruitmentOptions.map((option) => (
+          <button
+            key={option.name}
+            onClick={() => handleClick(option.cost, option.newMemberCount)}
+            disabled={option.cost > money}
+            title={`${option.newMemberCount} new members`}
+          >
+            {option.name} ({option.cost} money)
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

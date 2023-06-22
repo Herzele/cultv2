@@ -2,8 +2,8 @@ import React from 'react';
 
 function Log({ actions }) {
   return (
-    <div>
-      <ul>
+    <div className='logs-container'>
+      <ul className='simple-list'>
         {actions
           .slice(0)
           .reverse()
