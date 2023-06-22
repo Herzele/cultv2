@@ -118,6 +118,24 @@
   font-style: italic;
 }
 
+.upgrade-resource{
+  text-align: left;
+}
+
+.upgrade-table {
+  table-layout: fixed;
+}
+
+.upgrade-table .thRes{
+  width: 80%;
+}
+
+.upgrade-table .thVal{
+  width: 20%;
+}
+
+
+
 .left-column {
   flex: none;
   margin-top: 1%;

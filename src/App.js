@@ -23,6 +23,8 @@ function App() {
 
   const [recruitChance, setRecruitChance] = useState(0.05);
 
+  const [preachWorkGain, setPreachWorkGain] = useState(0.02);
+
   const [actions, setActions] = useState([]);
 
   const [daysPassed, setDaysPassed] = useState(0);
@@ -64,6 +66,12 @@ function App() {
       max: 5,
       perSecond: 0,
     },
+    {
+      name: 'Devotion',
+      value: 0.5,
+      max: 1.1,
+      perSecond: -0.01,
+    }
     // add more resources here
   ]);
 
@@ -335,6 +343,8 @@ function App() {
       ]);
     }
   };
+
+
   
 
   const handlePurchaseUpgrade = (upgrade) => {
@@ -538,6 +548,28 @@ function App() {
         setMembersThr1(true);
       }
     };
+
+    const updateDevotion = () => {
+      setResources((prevResources) => {
+        const updatedResources = prevResources.map((resource) => {
+          if (resource.name === 'Devotion') {
+            let totalDevotionPerSecond = resource.perSecond;
+            if(activeButton === 'preach'){
+              totalDevotionPerSecond += preachWorkGain;
+            }
+            const newValue = resource.value + totalDevotionPerSecond; // Decrease by 1 every second
+            const updatedValue = Math.max(newValue, 0); // Ensure value doesn't go below 0
+
+            return {
+              ...resource,
+              value: updatedValue,
+            };
+          }
+          return resource;
+        });
+        return updatedResources;
+      });
+    }
     
   
     // Set up the interval for periodic updates
@@ -546,6 +578,7 @@ function App() {
       updateMoney();
       updateFaith();
       updateMembers();
+      updateDevotion();
     }, speed);
   
     // Clean up the interval when the component unmounts or when the dependencies change
@@ -650,7 +683,11 @@ function App() {
       <div>
         <h2>Resources</h2>
       </div>
-      <Resources initialResources={resources} faithThr1={faithThr1} />
+      <Resources 
+        initialResources={resources} 
+        faithThr1={faithThr1} 
+        membersThr1={membersThr1}
+      />
     </div>
     <div className="center-column">
       <Tabs defaultActiveKey="game">
@@ -664,6 +701,8 @@ function App() {
           faithThr1={faithThr1}
           recruitChance={recruitChance}
           handleRecruit={handleRecruit}
+          membersThr1={membersThr1}
+          handlePreach={handlePreach}
         />
       </Tab>
         {/* <Tab eventKey="recruitment" title="Recruitment">

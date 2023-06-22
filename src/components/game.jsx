@@ -1,7 +1,18 @@
 import React from 'react';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-function Game({ moneyWorkGain, handleMoney, activeButton, faithWorkGain, handleFaith, faithThr1, recruitChance, handleRecruit }) {
+function Game({ 
+  moneyWorkGain, 
+  handleMoney, 
+  activeButton, 
+  faithWorkGain, 
+  handleFaith, 
+  faithThr1,
+  membersThr1,
+  devotionGain,
+  handlePreach,
+  recruitChance, 
+  handleRecruit }) {
   return (
     <div>
       <OverlayTrigger
@@ -39,6 +50,20 @@ function Game({ moneyWorkGain, handleMoney, activeButton, faithWorkGain, handleF
             disabled={activeButton === 'recruit'}
           >
             Recruit
+          </Button>
+        </OverlayTrigger>
+      )}
+      {membersThr1 && (
+        <OverlayTrigger
+          placement="bottom"
+          overlay={<Tooltip id="preach-tooltip">Devotion gained : {devotionGain}</Tooltip>}
+        >
+          <Button
+            className='action-button'
+            onClick={handlePreach}
+            disabled={activeButton === 'preach'}
+          >
+            Preach
           </Button>
         </OverlayTrigger>
       )}

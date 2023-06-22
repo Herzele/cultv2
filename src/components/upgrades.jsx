@@ -11,17 +11,17 @@ function Upgrade({ upgrades, handlePurchaseUpgrade, membersThr1, money }) {
       <div className="upgrade-title">{upgrade.name}</div>
       <div className="upgrade-flavor">{upgrade.flavor}</div>
       <div className="upgrade-requirements">
-        <table>
+        <table className='upgrade-table'>
           <thead>
             <tr>
-              <th>Resource</th>
-              <th>Cost</th>
+              <th className='thRes'>Resource</th>
+              <th className='thVal'>Cost</th>
             </tr>
           </thead>
           <tbody>
             {upgrade.requirements.map((requirement) => (
               <tr key={requirement.resource}>
-                <td>{requirement.resource}</td>
+                <td className="upgrade-resource">{requirement.resource}</td>
                 <td>{requirement.cost}</td>
               </tr>
             ))}
@@ -29,17 +29,17 @@ function Upgrade({ upgrades, handlePurchaseUpgrade, membersThr1, money }) {
         </table>
       </div>
       <div className="upgrade-benefits">
-        <table>
+        <table className='upgrade-table'>
           <thead>
             <tr>
-              <th>Resource</th>
-              <th>Gain</th>
+              <th className='thRes'>Resource</th>
+              <th className='thVal'>Gain</th>
             </tr>
           </thead>
           <tbody>
             {upgrade.benefits.map((benefits) => (
               <tr key={benefits.resource}>
-                <td>{benefits.resource}</td>
+                <td className="upgrade-resource">{benefits.resource}</td>
                 <td>{benefits.gain}</td>
               </tr>
             ))}
