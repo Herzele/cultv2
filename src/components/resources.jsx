@@ -7,11 +7,11 @@ function Resources({ initialResources, faithThr1, membersThr1 }) {
     setResources(initialResources);
   }, [initialResources]);
 
-  const formatValue = (value, max, isPercentage) => {
+  const formatValue = (value, isPercentage) => {
     if (isPercentage) {
-      return `${(value * 100).toFixed(2)}%`;
+      return `${(value * 100).toFixed(0)}% `;
     } else {
-      return `${Math.round(value).toLocaleString()} / ${Math.round(max).toLocaleString()}`;
+      return value < 100000 ? value.toLocaleString() : `${(value / 1000).toFixed(1)}K`;
     }
   };
 
@@ -25,7 +25,9 @@ function Resources({ initialResources, faithThr1, membersThr1 }) {
                 <td className='resTd1'>{name}</td>
                 <td className='resTd2'>
                   <span style={{ color: value === max ? 'red' : 'inherit' }}>
-                    {name === 'Devotion' ? formatValue(value, max, true) : formatValue(value, max)}
+                    {name === 'Devotion' ? formatValue(value, true) : formatValue(value)} 
+                    &nbsp;/&nbsp;
+                    {name === 'Devotion' ? formatValue(max, true) : formatValue(max)} 
                   </span>
                 </td>
                 <td className='resTd3'>

@@ -558,7 +558,10 @@ function App() {
               totalDevotionPerSecond += preachWorkGain;
             }
             const newValue = resource.value + totalDevotionPerSecond; // Decrease by 1 every second
-            const updatedValue = Math.max(newValue, 0); // Ensure value doesn't go below 0
+            let updatedValue = Math.max(newValue, 0); // Ensure value doesn't go below 0
+            if(updatedValue > resource.max ){ // Ensure value doesn't go above max
+              updatedValue = resource.max
+            }
 
             return {
               ...resource,

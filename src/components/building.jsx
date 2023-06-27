@@ -1,5 +1,5 @@
 import React from 'react';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 function Building({ buildings, handleAcquireBuilding, maxMembers, money }) {
   const handleClick = (name, cost, effect, value) => {
@@ -18,13 +18,13 @@ function Building({ buildings, handleAcquireBuilding, maxMembers, money }) {
               <div>Effect: {building.effect}</div>
             </Tooltip>}
         >
-          <button
+          <Button
             className="building-button"
             onClick={() => handleClick(building.name, building.cost, building.effect, building.value)} 
             disabled={building.owned || building.cost > money}
           >
             {building.name}
-          </button>
+          </Button>
         </OverlayTrigger>
       ))}
     </div>
