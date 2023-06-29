@@ -4,7 +4,7 @@ import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 function Game({ 
   moneyWorkGain, 
   handleMoney, 
-  activeButton, 
+  actions, 
   faithWorkGain, 
   handleFaith, 
   faithThr1,
@@ -22,7 +22,7 @@ function Game({
         <Button
           className="action-button"
           onClick={handleMoney}
-          disabled={activeButton === 'money'}
+          disabled={actions.find((action) => action.name === 'Work').isActive}
         >
           Work
         </Button>
@@ -34,7 +34,7 @@ function Game({
         <Button
           className='action-button'
           onClick={handleFaith}
-          disabled={activeButton === 'faith'}
+          disabled={actions.find((action) => action.name === 'Pray').isActive}
         >
           Pray
         </Button>
@@ -47,7 +47,7 @@ function Game({
           <Button
             className='action-button'
             onClick={handleRecruit}
-            disabled={activeButton === 'recruit'}
+            disabled={actions.find((action) => action.name === 'Recruit').isActive}
           >
             Recruit
           </Button>
@@ -61,7 +61,7 @@ function Game({
           <Button
             className='action-button'
             onClick={handlePreach}
-            disabled={activeButton === 'preach'}
+            disabled={actions.find((action) => action.name === 'Preach').isActive}
           >
             Preach
           </Button>

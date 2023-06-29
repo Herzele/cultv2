@@ -11,7 +11,7 @@ function Resources({ initialResources, faithThr1, membersThr1 }) {
     if (isPercentage) {
       return `${(value * 100).toFixed(0)}% `;
     } else {
-      return value < 100000 ? value.toLocaleString() : `${(value / 1000).toFixed(1)}K`;
+      return value < 100000 ? value.toFixed(0) : `${(value / 1000).toFixed(1)}K`;
     }
   };
 
@@ -32,7 +32,7 @@ function Resources({ initialResources, faithThr1, membersThr1 }) {
                 </td>
                 <td className='resTd3'>
                   <span>
-                    {name === 'Devotion' ? formatValue(perSecond, true) : `${perSecond}`} /s
+                    {name === 'Devotion' ? formatValue(perSecond, true) : `${formatValue(perSecond)}`} /s
                   </span>
                 </td>
               </tr>

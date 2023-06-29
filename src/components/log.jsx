@@ -1,14 +1,14 @@
 import React from 'react';
 
-function Log({ actions }) {
+function Log({ logs }) {
   return (
     <div className='logs-container'>
       <ul className='simple-list'>
-        {actions
+        {logs
           .slice(0)
           .reverse()
-          .map((action, index) => (
-            <li key={index}>{action}</li>
+          .map((logs, index) => (
+            <li key={index}>{logs}</li>
           ))}
       </ul>
     </div>

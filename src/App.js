@@ -25,7 +25,7 @@ function App() {
 
   const [preachWorkGain, setPreachWorkGain] = useState(0.02);
 
-  const [actions, setActions] = useState([]);
+  const [logs, setLogs] = useState([]);
 
   const [daysPassed, setDaysPassed] = useState(0);
 
@@ -73,6 +73,29 @@ function App() {
       perSecond: -0.01,
     }
     // add more resources here
+  ]);
+
+  const [actions, setActions] = useState([
+    {
+      name: 'Work',
+      isActive: true,
+      perSecond: 2,
+    },
+    {
+      name: 'Pray',
+      isActive: false,
+      perSecond: 2,
+    },
+    {
+      name: 'Recruit',
+      isActive: false,
+      perSecond: 0.05,
+    },
+    {
+      name: 'Preach',
+      isActive: false,
+      perSecond: 1,
+    }
   ]);
 
   const character = [
@@ -286,8 +309,8 @@ function App() {
         }
       }
   
-      setActions([
-        ...actions,
+      setLogs([
+        ...logs,
         'You build the stuff!',
       ]);
   
@@ -304,8 +327,8 @@ function App() {
   
       setBuildings(updatedBuildings);
     } else {
-      setActions([
-        ...actions,
+      setLogs([
+        ...logs,
         'Not enough money',
       ]);
     }
@@ -327,18 +350,18 @@ function App() {
         return [...prevResources];
       });
   
-      setActions([
-        ...actions,
+      setLogs([
+        ...logs,
         `Total members: ${membersResource.value + newMemberCount}`,
       ]);
     } else if (membersResource.value >= membersResource.max) {
-      setActions([
-        ...actions,
+      setLogs([
+        ...logs,
         'Failed to recruit new members. Maximum member limit reached.',
       ]);
     } else {
-      setActions([
-        ...actions,
+      setLogs([
+        ...logs,
         'Failed to recruit new members. Insufficient funds.',
       ]);
     }
@@ -359,8 +382,8 @@ function App() {
       const resourceValue = resources.find((res) => res.name === resource)?.value || 0;
   
       if (cost > resourceValue) {
-        setActions([
-          ...actions,
+        setLogs([
+          ...logs,
           `Not enough ${resource}.`,
         ]);
         return;
@@ -414,167 +437,171 @@ function App() {
     }
   };
   
+    // Function to update faith state
+const updateFaith = () => {
+  setResources((prevResources) => {
+    let members = prevResources.find((resource) => resource.name === 'Members').value;
+    let devotionMulti = prevResources.find((resource) => resource.name === 'Devotion').value;
+    let totalFaithPerSecond = members * devotionMulti;
+
+    const activeButton = actions.find((action) => action.name === 'Pray');
+    if (activeButton.isActive) {
+      totalFaithPerSecond += faithWorkGain;
+    }
+
+    const updatedResources = prevResources.map((resource) => {
+      if (resource.name === 'Faith') {
+        const updatedFaith = {
+          ...resource,
+          value: resource.value + totalFaithPerSecond,
+          perSecond: totalFaithPerSecond,
+        };
+
+        return {
+          ...updatedFaith,
+          value: updatedFaith.value > updatedFaith.max ? updatedFaith.max : updatedFaith.value,
+          perSecond: totalFaithPerSecond,
+        };
+      }
+      return resource;
+    });
+
+    return updatedResources;
+  });
+
+  // Check and activate faith thresholds
+  const faithValue = resources.find((resource) => resource.name === 'Faith').value;
+  if (!faithThr1 && faithValue + faithWorkGain >= 100) {
+    setFaithThr1(true);
+  }
+};  
+
+
+// Function to update money state
+const updateMoney = () => {
+  let totalMoneyPerSecond = 0;
+
+  const activeButton = actions.find((action) => action.name === 'Work');
+  if (activeButton.isActive) {
+    totalMoneyPerSecond += moneyWorkGain;
+  }
+
+  totalMoneyPerSecond = 
+    totalMoneyPerSecond + 
+    (moneyPerMember * resources.find((resource) => resource.name === 'Members').value) - billAmount;
+
+    setResources((prevResources) => {
+      const updatedResources = prevResources.map((resource) => {
+        if (resource.name === 'Money') {
+          const newMoney = resource.value + totalMoneyPerSecond;
+    
+          // Check the new money value and apply the rules if :
+          // - it's equal to 0 (force activity to work)
+          // - it's superior to max (set value to max)
+          // - it's neither of those, and we update the money value
+          
+          if (newMoney >= resource.max) {
+            return {
+              ...resource,
+              value: resource.max,
+              perSecond: totalMoneyPerSecond,
+            };
+          } else if (newMoney <= 0) {
+            setActiveButton('money');
+            return {
+              ...resource,
+              value: 0,
+              perSecond: totalMoneyPerSecond,
+            };
+          } else {
+            return {
+              ...resource,
+              value: newMoney,
+              perSecond: totalMoneyPerSecond,
+            };
+          }
+        }
+        
+        return resource;
+      });
+    
+      return updatedResources;
+    });
+
+      // Check and activate money thresholds
+  if (!moneyThr1 && resources.find((resource) => resource.name === 'Money').value + totalMoneyPerSecond >= 100) {
+    setMoneyThr1(true);
+  } else if (!moneyThr2 && faithThr1 && resources.find((resource) => resource.name === 'Money').value + totalMoneyPerSecond >= 1000) {
+    setMoneyThr2(true);
+  }
+};
+
+    // Function to update members state
+const updateMembers = () => {
+  setResources((prevResources) => {
+    let totalMembersPerSecond = 0;
+
+    const activeButton = actions.find((action) => action.name === 'Recruit');
+    if (activeButton.isActive) {
+      const chance = Math.random();
+      if (chance < recruitChance && prevResources.find((resource) => resource.name === 'Members').value < prevResources.find((resource) => resource.name === 'Members').max) {
+        totalMembersPerSecond += 1;
+        setLogs([...logs, `You recruited 1 new member for your cult`]);
+      } else if (chance < recruitChance && prevResources.find((resource) => resource.name === 'Members').value >= prevResources.find((resource) => resource.name === 'Members').max) {
+        setLogs([...logs, `Can't recruit anymore!`]);
+      }
+    }
+
+    const updatedResources = prevResources.map((resource) => {
+      if (resource.name === 'Members') {
+        return {
+          ...resource,
+          value: resource.value + totalMembersPerSecond,
+        };
+      }
+      return resource;
+    });
+
+    return updatedResources;
+  });
   
+    // Check and activate members thresholds
+    const membersValue = resources.find((resource) => resource.name === 'Members').value;
+    if (!membersThr1 && membersValue >= 5) {
+      setMembersThr1(true);
+    }
+  };
+
+// Function to update devotion state
+const updateDevotion = () => {
+  setResources((prevResources) => {
+    const updatedResources = prevResources.map((resource) => {
+      if (resource.name === 'Devotion') {
+        let totalDevotionPerSecond = resource.perSecond;
+
+        const activeButton = actions.find((action) => action.name === 'Preach');
+        if(activeButton.isActive){
+          totalDevotionPerSecond += preachWorkGain;
+        }
+        const newValue = resource.value + totalDevotionPerSecond; // Decrease by 1 every second
+        let updatedValue = Math.max(newValue, 0); // Ensure value doesn't go below 0
+        if(updatedValue > resource.max ){         // Ensure value doesn't go above max
+          updatedValue = resource.max
+        }
+
+        return {
+          ...resource,
+          value: updatedValue,
+        };
+      }
+      return resource;
+    });
+    return updatedResources;
+  });
+}
 
   useEffect(() => {
-    // Function to update money state
-    const updateMoney = () => {
-      let totalMoneyPerSecond = 0;
-  
-      if (activeButton === 'money') {
-        totalMoneyPerSecond += moneyWorkGain;
-      }
-  
-      totalMoneyPerSecond = 
-        totalMoneyPerSecond + 
-        (moneyPerMember * resources.find((resource) => resource.name === 'Members').value) - billAmount;
-  
-        setResources((prevResources) => {
-          const updatedResources = prevResources.map((resource) => {
-            if (resource.name === 'Money') {
-              const newMoney = resource.value + totalMoneyPerSecond;
-        
-              // Check the new money value and apply the rules if :
-              // - it's equal to 0 (force activity to work)
-              // - it's superior to max (set value to max)
-              // - it's neither of those, and we update the money value
-              
-              if (newMoney >= resource.max) {
-                return {
-                  ...resource,
-                  value: resource.max,
-                  perSecond: totalMoneyPerSecond,
-                };
-              } else if (newMoney <= 0) {
-                setActiveButton('money');
-                return {
-                  ...resource,
-                  value: 0,
-                  perSecond: totalMoneyPerSecond,
-                };
-              } else {
-                return {
-                  ...resource,
-                  value: newMoney,
-                  perSecond: totalMoneyPerSecond,
-                };
-              }
-            }
-            
-            return resource;
-          });
-        
-          return updatedResources;
-        });
-  
-      // Check and activate money thresholds
-      if (!moneyThr1 && resources.find((resource) => resource.name === 'Money').value + totalMoneyPerSecond >= 100) {
-        setMoneyThr1(true);
-      } else if (!moneyThr2 && faithThr1 && resources.find((resource) => resource.name === 'Money').value + totalMoneyPerSecond >= 1000) {
-        setMoneyThr2(true);
-      }
-  
 
-    };
-  
-    // Function to update faith state
-    const updateFaith = () => {
-      setResources((prevResources) => {
-        let totalFaithPerSecond = prevResources.find((resource) => resource.name === 'Members').value;
-    
-        if (activeButton === 'faith') {
-          totalFaithPerSecond += faithWorkGain;
-        }
-    
-        const updatedResources = prevResources.map((resource) => {
-          if (resource.name === 'Faith') {
-            const updatedFaith = {
-              ...resource,
-              value: resource.value + totalFaithPerSecond,
-              perSecond: totalFaithPerSecond,
-            };
-    
-            return {
-              ...updatedFaith,
-              value: updatedFaith.value > updatedFaith.max ? updatedFaith.max : updatedFaith.value,
-              perSecond: totalFaithPerSecond,
-            };
-          }
-          return resource;
-        });
-    
-        return updatedResources;
-      });
-    
-      // Check and activate faith thresholds
-      const faithValue = resources.find((resource) => resource.name === 'Faith').value;
-      if (!faithThr1 && faithValue + faithWorkGain >= 100) {
-        setFaithThr1(true);
-      }
-    };
-    
-  
-    // Function to update members state
-    const updateMembers = () => {
-      setResources((prevResources) => {
-        let totalMembersPerSecond = 0;
-    
-        if (activeButton === 'recruit') {
-          const chance = Math.random();
-          if (chance < recruitChance && prevResources.find((resource) => resource.name === 'Members').value < prevResources.find((resource) => resource.name === 'Members').max) {
-            totalMembersPerSecond += 1;
-            setActions([...actions, `You recruited 1 new member for your cult`]);
-          } else if (chance < recruitChance && prevResources.find((resource) => resource.name === 'Members').value >= prevResources.find((resource) => resource.name === 'Members').max) {
-            setActions([...actions, `Can't recruit anymore!`]);
-          }
-        }
-    
-        const updatedResources = prevResources.map((resource) => {
-          if (resource.name === 'Members') {
-            return {
-              ...resource,
-              value: resource.value + totalMembersPerSecond,
-            };
-          }
-          return resource;
-        });
-    
-        return updatedResources;
-      });
-    
-      // Check and activate members thresholds
-      const membersValue = resources.find((resource) => resource.name === 'Members').value;
-      if (!membersThr1 && membersValue >= 5) {
-        setMembersThr1(true);
-      }
-    };
-
-    const updateDevotion = () => {
-      setResources((prevResources) => {
-        const updatedResources = prevResources.map((resource) => {
-          if (resource.name === 'Devotion') {
-            let totalDevotionPerSecond = resource.perSecond;
-            if(activeButton === 'preach'){
-              totalDevotionPerSecond += preachWorkGain;
-            }
-            const newValue = resource.value + totalDevotionPerSecond; // Decrease by 1 every second
-            let updatedValue = Math.max(newValue, 0); // Ensure value doesn't go below 0
-            if(updatedValue > resource.max ){ // Ensure value doesn't go above max
-              updatedValue = resource.max
-            }
-
-            return {
-              ...resource,
-              value: updatedValue,
-            };
-          }
-          return resource;
-        });
-        return updatedResources;
-      });
-    }
-    
-  
     // Set up the interval for periodic updates
     const interval = setInterval(() => {
       // Call the update functions for each state variable
@@ -602,22 +629,40 @@ function App() {
   ]);
   
   
-
+  const updateActions = (actionName) => {
+    setActions((prevActions) => {
+      const updatedActions = prevActions.map((action) => {
+        if (action.name === actionName) {
+          return {
+            ...action,
+            isActive: true,
+          };
+        } else {
+          return {
+            ...action,
+            isActive: false,
+          };
+        }
+      });
+  
+      return updatedActions;
+    });
+  };
 
   const handlePreach = () => {
-    setActiveButton("preach");
+    updateActions('Preach');
   };
 
   const handleMoney = () => {
-    setActiveButton("money");
+    updateActions('Work');
   };
 
   const handleFaith = () => {
-    setActiveButton("faith");
+    updateActions('Pray');
   };
 
   const handleRecruit = () => {
-    setActiveButton("recruit");
+    updateActions('Recruit');
   };
 
   function toggleTestMode() {
@@ -698,7 +743,7 @@ function App() {
         <Game
           moneyWorkGain={moneyWorkGain}
           handleMoney={handleMoney}
-          activeButton={activeButton}
+          actions={actions}
           faithWorkGain={faithWorkGain}
           handleFaith={handleFaith}
           faithThr1={faithThr1}
@@ -737,7 +782,7 @@ function App() {
       <div>
         <h2>Logs</h2>
       </div>
-      <Log actions={actions} />
+      <Log logs={logs} />
     </div>
   </div>
 </div>
